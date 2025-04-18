@@ -1,58 +1,55 @@
-# DevSecOps CI/CD Pipeline with Fortify and WebInspect
+# DevSecOps CI/CD Pipeline Example
 
-## Overview
-This project demonstrates how to set up a DevSecOps pipeline integrating:
-- **Fortify SCA** for Static Application Security Testing (SAST)
-- **WebInspect** for Dynamic Application Security Testing (DAST)
-- **Audit Workbench** for reviewing scan results
-- **GitHub Actions** for CI/CD automation
+This is a simple Node.js application demonstrating a production-level DevSecOps CI/CD setup using GitHub Actions.
 
-The web app is a basic Node.js Express server.
+## Features
 
-## Project Goals
-- Automate security scanning in CI/CD
-- Learn how to integrate SAST and DAST tools
-- Review and act on security findings using Audit Workbench
+- CI/CD pipeline using GitHub Actions
+- Simulated SAST scan using Fortify
+- Simulated DAST scan using WebInspect
+- Upload of scan artifacts
+- Secrets management using GitHub secrets
+- Conditional logic for production-like workflows
 
-## Prerequisites
-- Fortify SCA installed locally (for SAST)
-- WebInspect installed on Windows (for DAST)
-- GitHub account with Actions enabled
-- Basic understanding of CI/CD and Git
+## Project Structure
 
-## Running the App Locally
+```
+devsecops-pipeline/
+├── app/
+│   ├── app.js
+│   └── package.json
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml
+└── README.md
+```
+
+## GitHub Setup Instructions
+
+1. **Push this project to GitHub**
+
 ```bash
-cd app
-npm install
-npm start
-```
-Visit: `http://localhost:3000`
-
-## CI/CD Pipeline Flow
-1. Code is pushed to `main` branch
-2. GitHub Actions runs the pipeline:
-    - Installs dependencies
-    - Runs Fortify SCA scan
-    - Archives results
-    - Deploys to staging (simulated)
-    - (Optionally) Triggers WebInspect scan manually or via API
-    - Uploads DAST report
-
-## Fortify SAST Scan (run_fortify.sh)
-```bash
-sourceanalyzer -b myproject -clean
-sourceanalyzer -b myproject ./app/*.js
-sourceanalyzer -b myproject -scan -f fortify_output/fortify.fpr
+git init
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git add .
+git commit -m "Initial commit with DevSecOps pipeline"
+git push -u origin main
 ```
 
-## WebInspect DAST Scan (run_webinspect.bat)
-```bat
-"C:\Program Files\HP\HP WebInspect\WebInspect.exe" /scan /url http://localhost:3000 /policy Default /report webinspect_output/report.xml
-```
+2. **Add GitHub Secrets**
 
-## Reviewing Reports
-Open `fortify.fpr` in Audit Workbench for detailed analysis. Use `report.xml` for DAST insights.
+Go to `Settings > Secrets and variables > Actions` and add the following:
+- `FORTIFY_TOKEN`: Your Fortify access token
+- `FORTIFY_URL`: Your Fortify server URL
 
-## Contributors
-- **AbhiramMangde** - DevOps Engineering
-- **Siddhi Itkelwar** - Security Testing
+3. **Review the Workflow**
+
+Check `.github/workflows/ci-cd.yml` to understand each step.
+
+4. **Trigger the Workflow**
+
+Push a change to `main` branch or create a PR to trigger the workflow.
+
+## Note
+
+This example includes simulated scan steps. Replace with real Fortify and WebInspect commands if needed.
