@@ -43,7 +43,7 @@ jobs:
           zip -r fortify_output.zip fortify_output
 
       - name: Upload Fortify Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: fortify-results
           path: fortify_output.zip
@@ -52,7 +52,7 @@ jobs:
         run: zip -r app.zip app
 
       - name: Upload App Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: app-artifact
           path: app.zip
@@ -78,7 +78,7 @@ jobs:
           Compress-Archive -Path webinspect_output -DestinationPath webinspect_output.zip
 
       - name: Upload WebInspect Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: webinspect-results
           path: webinspect_output.zip
