@@ -1,0 +1,23 @@
+name: Test Upload Artifact
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create Dummy File
+        run: |
+          echo "This is a test file" > test.txt
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-artifact
+          path: test.txt
