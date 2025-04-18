@@ -54,5 +54,5 @@ sourceanalyzer -b myproject -scan -f fortify_output/fortify.fpr
 Open `fortify.fpr` in Audit Workbench for detailed analysis. Use `report.xml` for DAST insights.
 
 ## Contributors
-- **Abhiram Chandrashekhar Mangde** - DevOps Engineering
-- **[Your Collaborator's Name]** - Security Testing Specialist
+- **AbhiramMangde** - DevOps Engineering
+- **Siddhi Itkelwar** - Security Testing
