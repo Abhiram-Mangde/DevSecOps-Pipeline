@@ -1,73 +1,84 @@
 name: DevSecOps CI/CD Pipeline
 
-on: push: branches: [ main ] pull_request: branches: [ main ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-jobs: build-and-scan: runs-on: ubuntu-latest env: FORTIFY_PROJECT: myproject FORTIFY_TOKEN: ${{ secrets.FORTIFY_TOKEN }} FORTIFY_URL: ${{ secrets.FORTIFY_URL }}
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    env:
+      FORTIFY_PROJECT: myproject
+      FORTIFY_TOKEN: ${{ secrets.FORTIFY_TOKEN }}
+      FORTIFY_URL: ${{ secrets.FORTIFY_URL }}
 
-steps:
-  - name: Checkout Code
-    uses: actions/checkout@v2
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-  - name: Set up Node.js
-    uses: actions/setup-node@v2
-    with:
-      node-version: '14'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-  - name: Install Dependencies
-    run: |
-      cd app
-      npm install
+      - name: Install Dependencies
+        run: |
+          cd app
+          npm install
 
-  - name: Run Fortify SAST (Simulated)
+      - name: Run Fortify SAST (Simulated)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "[Simulated] Running Fortify SAST scan..."
+          echo "sourceanalyzer -b $FORTIFY_PROJECT -clean"
+          echo "sourceanalyzer -b $FORTIFY_PROJECT ./app/*.js"
+          echo "sourceanalyzer -b $FORTIFY_PROJECT -scan -f fortify_output/fortify.fpr"
+
+      - name: Archive Fortify Results (Simulated)
+        run: |
+          mkdir -p fortify_output
+          echo "Simulated Fortify result" > fortify_output/fortify.fpr
+          zip -r fortify_output.zip fortify_output
+
+      - name: Upload Fortify Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: fortify-results
+          path: fortify_output.zip
+
+      - name: Archive App
+        run: zip -r app.zip app
+
+      - name: Upload App Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-artifact
+          path: app.zip
+
+  run-webinspect:
+    runs-on: windows-latest
+    needs: build-and-scan
     if: github.ref == 'refs/heads/main'
-    run: |
-      echo "[Simulated] Running Fortify SAST scan..."
-      echo "sourceanalyzer -b $FORTIFY_PROJECT -clean"
-      echo "sourceanalyzer -b $FORTIFY_PROJECT ./app/*.js"
-      echo "sourceanalyzer -b $FORTIFY_PROJECT -scan -f fortify_output/fortify.fpr"
+    env:
+      WEBINSPECT_PATH: "C:\\Program Files\\HP\\HP WebInspect\\WebInspect.exe"
+      SCAN_URL: http://localhost:3000
 
-  - name: Archive Fortify Results (Simulated)
-    run: |
-      mkdir -p fortify_output
-      echo "Simulated Fortify result" > fortify_output/fortify.fpr
-      zip -r fortify_output.zip fortify_output
+    steps:
+      - name: Simulate WebInspect DAST Scan
+        run: |
+          echo "[Simulated] Running WebInspect DAST scan on $SCAN_URL"
+          echo "%WEBINSPECT_PATH% /scan /url %SCAN_URL% /policy Default /report webinspect_output/report.xml"
 
-  - name: Upload Fortify Artifact
-    uses: actions/upload-artifact@v2
-    with:
-      name: fortify-results
-      path: fortify_output.zip
+      - name: Archive WebInspect Results
+        run: |
+          mkdir webinspect_output
+          echo "Simulated WebInspect result" > webinspect_output/report.xml
+          Compress-Archive -Path webinspect_output -DestinationPath webinspect_output.zip
 
-  - name: Archive App
-    run: zip -r app.zip app
-
-  - name: Upload App Artifact
-    uses: actions/upload-artifact@v2
-    with:
-      name: app-artifact
-      path: app.zip
-
-run-webinspect: runs-on: windows-latest needs: build-and-scan if: github.ref == 'refs/heads/main' env: WEBINSPECT_PATH: "C:\Program Files\HP\HP WebInspect\WebInspect.exe" SCAN_URL: http://localhost:3000
-
-steps:
-  - name: Simulate WebInspect DAST Scan
-    run: |
-      echo "[Simulated] Running WebInspect DAST scan on $SCAN_URL"
-      echo "%WEBINSPECT_PATH% /scan /url %SCAN_URL% /policy Default /report webinspect_output/report.xml"
-
-  - name: Archive WebInspect Results
-    run: |
-      mkdir webinspect_output
-      echo "Simulated WebInspect result" > webinspect_output/report.xml
-      Compress-Archive -Path webinspect_output -DestinationPath webinspect_output.zip
-
-  - name: Upload WebInspect Artifact
-    uses: actions/upload-artifact@v2
-    with:
-      name: webinspect-results
-      path: webinspect_output.zip
-
-notify-success: runs-on: ubuntu-latest needs: [build-and-scan, run-webinspect] if: success() steps: - name: Notify via Slack (Simulated) run: echo "[Simulated] Deployment successful! Notifying via Slack."
-
-deploy: runs-on: ubuntu-latest needs: notify-success if: success() environment: name: production steps: - name: Deploy to Azure App Service (Simulated) run: echo "[Simulated] Deploying app to Azure App Service..."
-
+      - name: Upload WebInspect Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: webinspect-results
+          path: webinspect_output.zip
