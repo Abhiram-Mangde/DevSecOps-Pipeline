@@ -173,8 +173,6 @@ This project integrates **DevSecOps** into the CI/CD pipeline by automating secu
 ---
 
 ## Contributors
-
-- [Your Name](https://github.com/your-username)
-- Collaborators:
-  - [Colleague's Name](https://github.com/colleague-username)
+Abhiram Mangde
+Siddhi Itkelwar
 
